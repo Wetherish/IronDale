@@ -1,27 +1,26 @@
 package main
 
-import "core:fmt"
-import "entities"
+import sc "screens"
 import rl "vendor:raylib"
 
 main :: proc() {
-	fmt.println("\a")
-	screenWidth: i32 = 800
-	screenHeight: i32 = 450
+	screenW: i32 = 800
+	screenH: i32 = 450
 
-	ballPosition: rl.Vector2 = {cast(f32)screenHeight / 2, cast(f32)screenWidth / 2}
+	rl.InitWindow(screenW, screenH, "hollow iron")
 
-	h := entities.Hero{ballPosition}
-	t := entities.Tree{{ballPosition.y - 10, ballPosition.x - 10}}
-	rl.InitWindow(screenWidth, screenHeight, "test")
-	rl.SetTargetFPS(60)
+	mgr: sc.ScreenManager
+	sc.ManagerInit(&mgr)
+	defer sc.ManagerDestroy(&mgr)
+
+	sc.ManagerPush(&mgr, sc.CreateMainScreen("Main Menu"))
+
 	for !rl.WindowShouldClose() {
-
+		dt := rl.GetFrameTime()
 		rl.BeginDrawing()
-		rl.ClearBackground(rl.RAYWHITE)
-		entities.Draw(h)
-		entities.Draw(t)
-		entities.Update(&h)
+			rl.ClearBackground(rl.WHITE)
+			sc.ManagerUpdate(&mgr, dt)
+			sc.ManagerDraw(&mgr)
 		rl.EndDrawing()
 	}
 	rl.CloseWindow()
