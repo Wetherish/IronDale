@@ -1,10 +1,34 @@
 package entities
 
-Draw :: proc {
-	DrawHero,
-	DrawTree,
+import rl "vendor:raylib"
+
+Entity :: union {
+	Hero,
+	Tree,
 }
 
-Update :: proc {
-	UpdateHero,
+CreateHeroEntity :: proc(position: rl.Vector2, speed: f32) -> Entity {
+	return Hero{position = position, speed = speed}
+}
+
+CreateTreeEntity :: proc(position: rl.Vector2) -> Entity {
+	return Tree{position = position}
+}
+
+
+Draw :: proc(entity: Entity) {
+	switch value in entity {
+	case Hero:
+		DrawHero(value)
+	case Tree:
+		DrawTree(value)
+	}
+}
+
+Update :: proc(entity: ^Entity, dt: f32) {
+	switch &value in entity^ {
+	case Hero:
+		UpdateHero(&value, dt)
+	case Tree:
+	}
 }

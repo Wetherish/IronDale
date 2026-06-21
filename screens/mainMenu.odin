@@ -2,11 +2,11 @@ package screens
 
 import rl "vendor:raylib"
 
-do_nothing :: proc() {}
+do_nothing :: proc(mgr: ^ScreenManager) {}
 
 MenuEntry :: struct {
 	label:  cstring,
-	action: proc(),
+	action: proc(mgr: ^ScreenManager),
 }
 
 Menu :: struct {
@@ -25,7 +25,7 @@ MAIN_MENU_PROCS := ScreenBehavior {
 CreateMainMenu :: proc() -> Screen {
 	d := new(Menu)
 	d.entries = [2]MenuEntry {
-		{label = "Start", action = do_nothing},
+		{label = "Start", action = proc(mgr: ^ScreenManager){ManagerPush(mgr, CreateTestScreen())}},
 		{label = "Quit", action = do_nothing},
 	}
 	d.index = 0
@@ -68,7 +68,7 @@ Update :: proc(data: rawptr, dt: f32, mgr: ^ScreenManager) {
 
 	if rl.IsKeyPressed(rl.KeyboardKey.ENTER) {
 		if m.entries[m.index].action != nil {
-			m.entries[m.index].action()
+			m.entries[m.index].action(mgr)
 		}
 	}
 }
