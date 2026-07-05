@@ -13,6 +13,10 @@ run:
 debug:
 	$(CC) run $(SRC) $(FLAGS) -debug -- --debug
 
+.PHONY: test
+test:
+	$(CC) test $(SRC) $(FLAGS) -all-packages -define:ODIN_TEST_THREADS=1
+
 # Build the project without running it
 .PHONY: build
 build:
