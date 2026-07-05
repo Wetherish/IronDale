@@ -14,7 +14,6 @@ main :: proc() {
 
 	mgr: sc.ScreenManager
 	sc.ManagerInit(&mgr)
-	defer sc.ManagerDestroy(&mgr)
 
 	sc.ManagerPush(&mgr, sc.CreateMainScreen("Main Menu"))
 
@@ -26,6 +25,7 @@ main :: proc() {
 			sc.ManagerDraw(&mgr)
 		rl.EndDrawing()
 	}
+	sc.ManagerDestroy(&mgr)
 	rl.CloseWindow()
 }
 
