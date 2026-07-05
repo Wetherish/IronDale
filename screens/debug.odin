@@ -29,7 +29,7 @@ CreateDebugOverlay :: proc(enabled: bool) -> DebugOverlay {
 }
 
 DebugHero :: proc(s: ^TestScreen) -> ^e.Hero {
-	for &entity in s.entities {
+	for &entity in s.game.entities {
 		switch &value in entity {
 		case e.Hero:
 			return &value

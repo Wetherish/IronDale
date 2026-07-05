@@ -1,10 +1,10 @@
 package screens
 
-import e "../entities"
+import game "../game"
 
 TestScreen :: struct {
-	entities: [dynamic]e.Entity,
-	debug:    DebugOverlay,
+	game:  game.Game_State,
+	debug: DebugOverlay,
 }
 
 @(private = "file")
@@ -17,10 +17,8 @@ MAIN_PROCS := ScreenBehavior {
 
 CreateTestScreen :: proc() -> Screen {
 	s := new(TestScreen)
-	s.entities = make([dynamic]e.Entity)
+	s.game = game.CreateGameState()
 	s.debug = CreateDebugOverlay(Debug_Enabled)
-	append(&s.entities, e.CreateHeroEntity({100, 100}, 140))
-	append(&s.entities, e.CreateTreeEntity({250, 160}))
 	return Screen{behavior = &MAIN_PROCS, data = s}
 }
 
@@ -30,27 +28,20 @@ Init :: proc(raw: rawptr) {}
 @(private = "file")
 Destroy :: proc(raw: rawptr) {
 	s := cast(^TestScreen)raw
-	for &entity in s.entities {
-		e.Destroy(&entity)
-	}
-	delete(s.entities)
+	game.DestroyGameState(&s.game)
 	free(raw)
 }
 
 @(private = "file")
 Update :: proc(raw: rawptr, dt: f32, mgr: ^ScreenManager) {
 	s := cast(^TestScreen)raw
-	for &entity in s.entities {
-		e.Update(&entity, dt)
-	}
+	game.UpdateGameState(&s.game, dt)
 	UpdateDebugOverlay(&s.debug, DebugHero(s))
 }
 
 @(private = "file")
 Draw :: proc(raw: rawptr) {
 	s := cast(^TestScreen)raw
-	for entity in s.entities {
-		e.Draw(entity)
-	}
-	DrawDebugOverlay(&s.debug, DebugHero(s), len(s.entities))
+	game.DrawGameState(&s.game)
+	DrawDebugOverlay(&s.debug, DebugHero(s), len(s.game.entities))
 }

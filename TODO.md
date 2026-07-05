@@ -18,18 +18,18 @@ Roadmap for a 2D top-down Odin + raylib co-op game. Keep this file practical: ev
 
 - [x] Add a simple build/run command through `make run`.
 - [ ] Decide target platforms: Windows, Linux, or both.
-- [ ] Create folders for `assets/`, `core/`, `game/`, `world/`, and `ui/` as needed.
-- [ ] Move game constants into one place: screen size, target FPS, tile size, player speed.
-- [ ] Add a `Game_State` struct to own players, world data, camera, and runtime state.
+- [x] Create folders for `assets/`, `core/`, `game/`, `world/`, and `ui/` as needed.
+- [x] Move game constants into one place: screen size, target FPS, tile size, player speed.
+- [x] Add a `Game_State` struct to own players, world data, camera, and runtime state.
 - [x] Split high-level game flow into screens with update/draw/destroy behavior.
-- [ ] Split active gameplay state into `init`, `update`, `draw`, and `shutdown` style procedures.
+- [x] Split active gameplay state into `init`, `update`, `draw`, and `shutdown` style procedures.
 - [ ] Add debug toggles for collision boxes, FPS, player coordinates, and network status.
 
 ## 2. Core Game Loop
 
 - [x] Use frame delta time instead of fixed per-frame movement.
-- [ ] Add a camera that follows the local player.
-- [ ] Add world-space drawing instead of screen-space-only drawing.
+- [x] Add a camera that follows the local player.
+- [x] Add world-space drawing instead of screen-space-only drawing.
 - [ ] Add deterministic update order for players, enemies, projectiles, and world objects.
 - [x] Add basic menu screen handling.
 - [ ] Add in-game pause state handling.
@@ -137,7 +137,7 @@ Target: a small co-op room where two players can move, collide with obstacles, f
 
 - [x] Refactor `main.odin` to use screen-managed flow.
 - [x] Add delta-time movement.
-- [ ] Add a dedicated gameplay screen/state that owns world entities.
+- [x] Add a dedicated gameplay screen/state that owns world entities.
 - [ ] Add two player structs and local input bindings.
 - [ ] Add camera follow for both players.
 - [ ] Add collision against trees/walls.

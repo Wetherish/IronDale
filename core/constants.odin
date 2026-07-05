@@ -1,0 +1,8 @@
+package core
+
+SCREEN_WIDTH :: i32(800)
+SCREEN_HEIGHT :: i32(450)
+TARGET_FPS :: i32(60)
+
+PLAYER_SPEED :: f32(140)
+TILE_SIZE :: f32(32)
