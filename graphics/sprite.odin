@@ -27,15 +27,20 @@ SpriteValid :: proc(s: Sprite) -> bool {
 	return rl.IsTextureValid(s.texture)
 }
 
-DrawSprite :: proc(s: Sprite, row, col: int, position: rl.Vector2) {
+DrawSprite :: proc(s: Sprite, row, col: int, position: rl.Vector2, flip_x := false) {
 	if !SpriteValid(s) {
 		return
+	}
+
+	width := s.width
+	if flip_x {
+		width = -width
 	}
 
 	source := rl.Rectangle {
 		x      = f32(col) * s.width,
 		y      = f32(row) * s.height,
-		width  = s.width,
+		width  = width,
 		height = s.height,
 	}
 
