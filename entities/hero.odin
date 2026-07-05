@@ -84,9 +84,6 @@ DrawHero :: proc(h: Hero) {
 }
 
 UpdateHero :: proc(h: ^Hero, dt: f32) {
-	gr.PlayAnimation(&h.animator, h.idle)
-	gr.UpdateAnimation(&h.animator, dt)
-
 	input := rl.Vector2{}
 
 	if (rl.IsKeyDown(rl.KeyboardKey.RIGHT)) do input.x += 1
