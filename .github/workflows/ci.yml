@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    env:
+      ODIN_VERSION: dev-2026-06
+      ODIN_SHA256: 40f38b462f30914c7f07271c56c8b4b7a7a6e5d82789c8165f75ab569c3b96cc
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libasound2-dev \
+            libgl1-mesa-dev \
+            libx11-dev \
+            libxcursor-dev \
+            libxi-dev \
+            libxinerama-dev \
+            libxrandr-dev
+
+      - name: Install Odin
+        run: |
+          curl -L "https://github.com/odin-lang/Odin/releases/download/${ODIN_VERSION}/odin-linux-amd64-${ODIN_VERSION}.tar.gz" -o odin.tar.gz
+          echo "${ODIN_SHA256}  odin.tar.gz" | sha256sum -c -
+          mkdir odin
+          tar -xzf odin.tar.gz -C odin --strip-components=1
+          echo "$PWD/odin" >> "$GITHUB_PATH"
+
+      - name: Show Odin version
+        run: odin version
+
+      - name: Build
+        run: make build
+
+      - name: Test
+        run: make test
