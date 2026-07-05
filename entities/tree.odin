@@ -9,5 +9,3 @@ Tree :: struct {
 DrawTree :: proc(t: Tree) {
     rl.DrawRectangleV(t.position, {10, 50}, rl.GREEN)
 }
-
-
