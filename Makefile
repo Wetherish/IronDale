@@ -9,6 +9,10 @@ FLAGS = -vet -strict-style
 run:
 	$(CC) run $(SRC) $(FLAGS)
 
+.PHONY: debug
+debug:
+	$(CC) run $(SRC) $(FLAGS) -debug -- --debug
+
 # Build the project without running it
 .PHONY: build
 build:

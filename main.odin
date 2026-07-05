@@ -1,11 +1,14 @@
 package main
 
+import "core:os"
 import sc "screens"
 import rl "vendor:raylib"
 
 main :: proc() {
 	screenW: i32 = 800
 	screenH: i32 = 450
+
+	sc.Debug_Enabled = HasDebugArg()
 
 	rl.InitWindow(screenW, screenH, "hollow iron")
 
@@ -24,4 +27,14 @@ main :: proc() {
 		rl.EndDrawing()
 	}
 	rl.CloseWindow()
+}
+
+HasDebugArg :: proc() -> bool {
+	for arg in os.args {
+		if arg == "--debug" || arg == "-debug" {
+			return true
+		}
+	}
+
+	return false
 }
