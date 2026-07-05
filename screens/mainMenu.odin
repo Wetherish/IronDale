@@ -2,15 +2,13 @@ package screens
 
 import rl "vendor:raylib"
 
-do_nothing :: proc(mgr: ^ScreenManager) {}
-
 MenuEntry :: struct {
 	label:  cstring,
 	action: proc(mgr: ^ScreenManager),
 }
 
 Menu :: struct {
-	entries: [2]MenuEntry,
+	entries: [3]MenuEntry,
 	index:   int,
 }
 
@@ -24,13 +22,24 @@ MAIN_MENU_PROCS := ScreenBehavior {
 
 CreateMainMenu :: proc() -> Screen {
 	d := new(Menu)
-	d.entries = [2]MenuEntry {
-		{label = "Start", action = proc(mgr: ^ScreenManager){ManagerPush(mgr, CreateTestScreen())}},
-		{label = "Quit", action = do_nothing},
+	d.entries = [3]MenuEntry {
+		{label = "Start", action = StartGame},
+		{label = "Debug UI", action = ToggleDebugUI},
+		{label = "Quit", action = QuitGame},
 	}
 	d.index = 0
 	return Screen{data = d, behavior = &MAIN_MENU_PROCS}
 }
+
+StartGame :: proc(mgr: ^ScreenManager) {
+	ManagerPush(mgr, CreateTestScreen())
+}
+
+ToggleDebugUI :: proc(mgr: ^ScreenManager) {
+	Debug_Enabled = !Debug_Enabled
+}
+
+QuitGame :: proc(mgr: ^ScreenManager) {}
 
 @(private = "file")
 Init :: proc(ptr: rawptr) {}
@@ -47,7 +56,12 @@ Draw :: proc(data: rawptr) {
 			color = rl.RED
 		}
 
-		rl.DrawText(entry.label, 300, start_y + i32(i) * 40, 30, color)
+		label := entry.label
+		if entry.action == ToggleDebugUI {
+			label = Debug_Enabled ? "Debug UI: On" : "Debug UI: Off"
+		}
+
+		rl.DrawText(label, 300, start_y + i32(i) * 40, 30, color)
 	}
 }
 

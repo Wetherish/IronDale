@@ -1,17 +1,18 @@
 package main
 
+import "core:os"
+import cfg "core"
 import sc "screens"
 import rl "vendor:raylib"
 
 main :: proc() {
-	screenW: i32 = 800
-	screenH: i32 = 450
+	sc.Debug_Enabled = HasDebugArg()
 
-	rl.InitWindow(screenW, screenH, "hollow iron")
+	rl.InitWindow(cfg.SCREEN_WIDTH, cfg.SCREEN_HEIGHT, "hollow iron")
+	rl.SetTargetFPS(cfg.TARGET_FPS)
 
 	mgr: sc.ScreenManager
 	sc.ManagerInit(&mgr)
-	defer sc.ManagerDestroy(&mgr)
 
 	sc.ManagerPush(&mgr, sc.CreateMainScreen("Main Menu"))
 
@@ -23,5 +24,17 @@ main :: proc() {
 			sc.ManagerDraw(&mgr)
 		rl.EndDrawing()
 	}
+
+	sc.ManagerDestroy(&mgr)
 	rl.CloseWindow()
+}
+
+HasDebugArg :: proc() -> bool {
+	for arg in os.args {
+		if arg == "--debug" || arg == "-debug" {
+			return true
+		}
+	}
+
+	return false
 }
