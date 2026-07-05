@@ -8,7 +8,7 @@ Entity :: union {
 }
 
 CreateHeroEntity :: proc(position: rl.Vector2, speed: f32) -> Entity {
-	return Hero{position = position, speed = speed}
+	return CreateHero(position, speed)
 }
 
 CreateTreeEntity :: proc(position: rl.Vector2) -> Entity {
@@ -29,6 +29,14 @@ Update :: proc(entity: ^Entity, dt: f32) {
 	switch &value in entity^ {
 	case Hero:
 		UpdateHero(&value, dt)
+	case Tree:
+	}
+}
+
+Destroy :: proc(entity: ^Entity) {
+	switch &value in entity^ {
+	case Hero:
+		DestroyHero(&value)
 	case Tree:
 	}
 }

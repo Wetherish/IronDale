@@ -29,6 +29,9 @@ Init :: proc(raw: rawptr) {}
 @(private = "file")
 Destroy :: proc(raw: rawptr) {
 	s := cast(^TestScreen)raw
+	for &entity in s.entities {
+		e.Destroy(&entity)
+	}
 	delete(s.entities)
 	free(raw)
 }
