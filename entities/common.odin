@@ -15,7 +15,6 @@ CreateTreeEntity :: proc(position: rl.Vector2) -> Entity {
 	return Tree{position = position}
 }
 
-
 Draw :: proc(entity: Entity) {
 	switch value in entity {
 	case Hero:
