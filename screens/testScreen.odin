@@ -40,8 +40,8 @@ Destroy :: proc(raw: rawptr) {
 @(private = "file")
 Update :: proc(raw: rawptr, dt: f32, mgr: ^ScreenManager) {
 	s := cast(^TestScreen)raw
-	for &entity in s.entities {
-		e.Update(&entity, dt)
+	for &entity, index in s.entities {
+		e.Update(&entity, s.entities[:], index, dt)
 	}
 	UpdateDebugOverlay(&s.debug, DebugHero(s))
 }
@@ -52,5 +52,6 @@ Draw :: proc(raw: rawptr) {
 	for entity in s.entities {
 		e.Draw(entity)
 	}
+	DrawDebugCollisions(&s.debug, s.entities[:])
 	DrawDebugOverlay(&s.debug, DebugHero(s), len(s.entities))
 }

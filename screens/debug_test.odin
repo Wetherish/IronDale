@@ -33,17 +33,20 @@ debug_input_accepts_numeric_characters :: proc(t: ^testing.T) {
 
 @(test)
 debug_commit_updates_hero_values :: proc(t: ^testing.T) {
-	hero := e.Hero {
+	hero := e.Entity {
 		position = {10, 20},
-		speed    = 140,
+		data     = e.Hero {
+			speed = 140,
+		},
 	}
+	heroData := e.EntityGet(&hero, e.Hero)
 
 	debug := CreateDebugOverlay(true)
 
 	SetDebugTestInput(&debug, "220.5")
 	debug.active = .Speed
 	testing.expect(t, CommitDebugValue(&debug, &hero))
-	testing.expect_value(t, hero.speed, f32(220.5))
+	testing.expect_value(t, heroData.speed, f32(220.5))
 
 	SetDebugTestInput(&debug, "-12,25")
 	debug.active = .Pos_X
@@ -58,22 +61,25 @@ debug_commit_updates_hero_values :: proc(t: ^testing.T) {
 
 @(test)
 debug_commit_rejects_invalid_or_inactive_input :: proc(t: ^testing.T) {
-	hero := e.Hero {
+	hero := e.Entity {
 		position = {10, 20},
-		speed    = 140,
+		data     = e.Hero {
+			speed = 140,
+		},
 	}
+	heroData := e.EntityGet(&hero, e.Hero)
 
 	debug := CreateDebugOverlay(true)
 
 	SetDebugTestInput(&debug, "abc")
 	debug.active = .Speed
 	testing.expect(t, !CommitDebugValue(&debug, &hero))
-	testing.expect_value(t, hero.speed, f32(140))
+	testing.expect_value(t, heroData.speed, f32(140))
 
 	SetDebugTestInput(&debug, "55")
 	debug.active = .None
 	testing.expect(t, !CommitDebugValue(&debug, &hero))
-	testing.expect_value(t, hero.speed, f32(140))
+	testing.expect_value(t, heroData.speed, f32(140))
 }
 
 SetDebugTestInput :: proc(debug: ^DebugOverlay, text: string) {

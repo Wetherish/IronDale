@@ -28,30 +28,29 @@ CreateDebugOverlay :: proc(enabled: bool) -> DebugOverlay {
 	}
 }
 
-DebugHero :: proc(s: ^TestScreen) -> ^e.Hero {
+DebugHero :: proc(s: ^TestScreen) -> ^e.Entity {
 	for &entity in s.entities {
-		switch &value in entity {
-		case e.Hero:
-			return &value
-		case e.Tree:
+		if e.EntityGet(&entity, e.Hero) != nil {
+			return &entity
 		}
 	}
 
 	return nil
 }
 
-UpdateDebugOverlay :: proc(debug: ^DebugOverlay, hero: ^e.Hero) {
+UpdateDebugOverlay :: proc(debug: ^DebugOverlay, heroEntity: ^e.Entity) {
 	if rl.IsKeyPressed(rl.KeyboardKey.F3) {
 		debug.visible = !debug.visible
 		if !debug.visible do debug.active = .None
 	}
 
+	hero := e.EntityGet(heroEntity, e.Hero)
 	if !debug.visible || hero == nil {
 		return
 	}
 
 	if debug.active != .None {
-		UpdateDebugInput(debug, hero)
+		UpdateDebugInput(debug, heroEntity)
 		return
 	}
 
@@ -60,14 +59,14 @@ UpdateDebugOverlay :: proc(debug: ^DebugOverlay, hero: ^e.Hero) {
 		if rl.CheckCollisionPointRec(mouse, DebugFieldRect(.Speed)) {
 			BeginDebugEdit(debug, .Speed, hero.speed)
 		} else if rl.CheckCollisionPointRec(mouse, DebugFieldRect(.Pos_X)) {
-			BeginDebugEdit(debug, .Pos_X, hero.position.x)
+			BeginDebugEdit(debug, .Pos_X, heroEntity.position.x)
 		} else if rl.CheckCollisionPointRec(mouse, DebugFieldRect(.Pos_Y)) {
-			BeginDebugEdit(debug, .Pos_Y, hero.position.y)
+			BeginDebugEdit(debug, .Pos_Y, heroEntity.position.y)
 		}
 	}
 }
 
-DrawDebugOverlay :: proc(debug: ^DebugOverlay, hero: ^e.Hero, entity_count: int) {
+DrawDebugOverlay :: proc(debug: ^DebugOverlay, heroEntity: ^e.Entity, entity_count: int) {
 	if !debug.visible {
 		return
 	}
@@ -75,12 +74,13 @@ DrawDebugOverlay :: proc(debug: ^DebugOverlay, hero: ^e.Hero, entity_count: int)
 	x: f32 = 10
 	y: f32 = 10
 	w: f32 = 260
-	h: f32 = 184
+	h: f32 = 218
 
 	rl.DrawRectangleRec({x, y, w, h}, {20, 24, 28, 220})
 	rl.DrawRectangleLinesEx({x, y, w, h}, 1, {90, 98, 110, 255})
 	rl.DrawText("DEBUG  F3", i32(x + 10), i32(y + 8), 16, rl.RAYWHITE)
 
+	hero := e.EntityGet(heroEntity, e.Hero)
 	if hero == nil {
 		rl.DrawText("hero: missing", i32(x + 10), i32(y + 38), 14, rl.RED)
 		return
@@ -91,9 +91,32 @@ DrawDebugOverlay :: proc(debug: ^DebugOverlay, hero: ^e.Hero, entity_count: int)
 	rl.DrawText(rl.TextFormat("state: %s  prev: %s", DebugStateName(sm.current), DebugStateName(sm.previous)), i32(x + 10), i32(y + 54), 14, rl.LIGHTGRAY)
 	rl.DrawText(rl.TextFormat("time in state: %.2f", sm.time_in_state), i32(x + 10), i32(y + 74), 14, rl.LIGHTGRAY)
 	DrawDebugValue(debug, .Speed, "speed", hero.speed)
-	DrawDebugValue(debug, .Pos_X, "pos x", hero.position.x)
-	DrawDebugValue(debug, .Pos_Y, "pos y", hero.position.y)
-	rl.DrawText("click value, type, Enter / Esc", i32(x + 10), i32(y + 162), 12, rl.GRAY)
+	DrawDebugValue(debug, .Pos_X, "pos x", heroEntity.position.x)
+	DrawDebugValue(debug, .Pos_Y, "pos y", heroEntity.position.y)
+	rl.DrawText(
+		rl.TextFormat(
+			"collider: %.0fx%.0f  off %.0f,%.0f",
+			heroEntity.collider.size.x,
+			heroEntity.collider.size.y,
+			heroEntity.collider.offset.x,
+			heroEntity.collider.offset.y,
+		),
+		i32(x + 10),
+		i32(y + 180),
+		12,
+		rl.LIGHTGRAY,
+	)
+	rl.DrawText("click value, type, Enter / Esc", i32(x + 10), i32(y + 198), 12, rl.GRAY)
+}
+
+DrawDebugCollisions :: proc(debug: ^DebugOverlay, entities: []e.Entity) {
+	if !debug.visible {
+		return
+	}
+
+	for entity in entities {
+		e.DrawCollisionDebug(entity)
+	}
 }
 
 DebugStateName :: proc(state: e.CharacterState) -> cstring {
@@ -162,7 +185,7 @@ CopyDebugValue :: proc(debug: ^DebugOverlay, value: f32) {
 	debug.input[debug.input_len] = 0
 }
 
-UpdateDebugInput :: proc(debug: ^DebugOverlay, hero: ^e.Hero) {
+UpdateDebugInput :: proc(debug: ^DebugOverlay, heroEntity: ^e.Entity) {
 	if rl.IsKeyPressed(rl.KeyboardKey.ESCAPE) {
 		debug.active = .None
 		debug.parse_error = false
@@ -170,7 +193,7 @@ UpdateDebugInput :: proc(debug: ^DebugOverlay, hero: ^e.Hero) {
 	}
 
 	if rl.IsKeyPressed(rl.KeyboardKey.ENTER) {
-		if CommitDebugValue(debug, hero) {
+		if CommitDebugValue(debug, heroEntity) {
 			debug.active = .None
 			debug.parse_error = false
 		} else {
@@ -202,7 +225,12 @@ DebugCharAllowed :: proc(ch: rune) -> bool {
 	return (ch >= '0' && ch <= '9') || ch == '-' || ch == '.' || ch == ','
 }
 
-CommitDebugValue :: proc(debug: ^DebugOverlay, hero: ^e.Hero) -> bool {
+CommitDebugValue :: proc(debug: ^DebugOverlay, heroEntity: ^e.Entity) -> bool {
+	hero := e.EntityGet(heroEntity, e.Hero)
+	if hero == nil {
+		return false
+	}
+
 	text := string(debug.input[:debug.input_len])
 	normalized: [32]byte
 
@@ -219,9 +247,9 @@ CommitDebugValue :: proc(debug: ^DebugOverlay, hero: ^e.Hero) -> bool {
 	case .Speed:
 		hero.speed = value
 	case .Pos_X:
-		hero.position.x = value
+		heroEntity.position.x = value
 	case .Pos_Y:
-		hero.position.y = value
+		heroEntity.position.y = value
 	case .None:
 		return false
 	}

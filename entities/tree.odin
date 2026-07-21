@@ -3,11 +3,12 @@ package entities
 import rl "vendor:raylib"
 
 Tree :: struct {
-	position: rl.Vector2,
 }
 
-DrawTree :: proc(t: Tree) {
-    rl.DrawRectangleV(t.position, {10, 50}, rl.GREEN)
+CreateTree :: proc() -> Tree {
+	return Tree{}
 }
 
-
+DrawTree :: proc(t: Tree, position: rl.Vector2, collider: Collider) {
+	rl.DrawRectangleV(position, collider.size, rl.GREEN)
+}

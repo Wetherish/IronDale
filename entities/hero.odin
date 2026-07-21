@@ -39,7 +39,6 @@ Directional_Hero_Sprites :: struct {
 }
 
 Hero :: struct {
-	position: rl.Vector2,
 	speed:    f32,
 	idle:     Directional_Hero_Sprites,
 	run:      Directional_Hero_Sprites,
@@ -48,7 +47,7 @@ Hero :: struct {
 	facing:   Hero_Facing,
 }
 
-CreateHero :: proc(position: rl.Vector2, speed: f32) -> Hero {
+CreateHero :: proc(speed: f32) -> Hero {
 	idle := gr.CreateAnimationClip(0, 0, 8, 1.0 / 8.0)
 	walk := gr.CreateAnimationClip(0, 0, 8, 1.0 / 12.0)
 	fight := gr.CreateAnimationClip(0, 0, 8, 1.0 / 14.0, false)
@@ -59,7 +58,6 @@ CreateHero :: proc(position: rl.Vector2, speed: f32) -> Hero {
 	}
 
 	return Hero {
-		position = position,
 		speed    = speed,
 		idle     = LoadDirectionalHeroSprites(
 			PLAYER_IDLE_DOWN_SPRITE_PATH,
@@ -109,7 +107,7 @@ LoadHeroSprite :: proc(path: cstring) -> Loaded_Sprite {
 	return loaded_sprite
 }
 
-DrawHero :: proc(h: Hero) {
+DrawHero :: proc(h: Hero, position: rl.Vector2) {
 	sprite_set := h.idle
 
 	switch h.animator.state_machine.current {
@@ -120,11 +118,11 @@ DrawHero :: proc(h: Hero) {
 	case .Idle:
 	}
 
-	if DrawHeroSprite(sprite_set, h.facing, h.animator, h.position) {
+	if DrawHeroSprite(sprite_set, h.facing, h.animator, position) {
 		return
 	}
 
-	rl.DrawCircleV(h.position, 5, rl.BLUE)
+	rl.DrawCircleV(position, 5, rl.BLUE)
 }
 
 DrawHeroSprite :: proc(
@@ -166,7 +164,7 @@ HeroSpriteForFacing :: proc(sprites: Directional_Hero_Sprites, facing: Hero_Faci
 	return sprites.down
 }
 
-UpdateHero :: proc(h: ^Hero, dt: f32) {
+UpdateHero :: proc(h: ^Hero, entity: ^Entity, entities: []Entity, self_index: int, dt: f32) {
 	input := rl.Vector2{}
 
 	if (rl.IsKeyDown(rl.KeyboardKey.RIGHT)) do input.x += 1
@@ -207,8 +205,20 @@ UpdateHero :: proc(h: ^Hero, dt: f32) {
 		input.y *= 0.70710678
 	}
 
-	h.position.x += input.x * h.speed * dt
-	h.position.y += input.y * h.speed * dt
+	velocity := rl.Vector2{input.x * h.speed, input.y * h.speed}
+	MoveHeroWithCollision(entity, velocity, entities, self_index, dt)
+}
+
+MoveHeroWithCollision :: proc(entity: ^Entity, velocity: rl.Vector2, entities: []Entity, self_index: int, dt: f32) {
+	entity.position.x += velocity.x * dt
+	if EntityCollidesWithSolids(entity.position, entity.collider, entities, self_index) {
+		entity.position.x -= velocity.x * dt
+	}
+
+	entity.position.y += velocity.y * dt
+	if EntityCollidesWithSolids(entity.position, entity.collider, entities, self_index) {
+		entity.position.y -= velocity.y * dt
+	}
 }
 
 HeroAttackLocked :: proc(h: ^Hero) -> bool {
